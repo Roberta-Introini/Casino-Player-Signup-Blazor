@@ -1,0 +1,10 @@
+﻿@page "/account/logout"
+@layout MainLayout
+@inject IPlayerService PlayerService
+
+@code {
+    protected override async void OnInitialized()
+    {
+        await PlayerService.Logout();
+    }
+}

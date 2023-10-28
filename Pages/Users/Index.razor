@@ -1,0 +1,71 @@
+﻿@page "/players"
+@attribute [Authorize]
+@inject IPlayerService PlayerService
+
+<h1>Players</h1>
+<NavLink href="players/add" class="btn btn-sm btn-success mb-2">Add Player</NavLink>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 30%">First Name</th>
+            <th style="width: 30%">Last Name</th>
+            <th style="width: 30%">Username</th>
+            <th style="width: 10%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (players != null)
+        {
+            foreach (var user in players)
+            {
+                <tr>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
+                    <td>@user.Username</td>
+                    <td style="white-space: nowrap">
+                        <NavLink href="@($"players/edit/{user.Id}")" class="btn btn-sm btn-primary mr-1">Edit</NavLink>
+                        <button @onclick="@(() => DeletePlayer(user.Id))" disabled="@user.IsDeleting" class="btn btn-sm btn-danger btn-delete-user">
+                            @if (user.IsDeleting) 
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+                                <span>Delete</span>
+                            }
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        @if (loading)
+        {
+            <tr>
+                <td colspan="4" class="text-center">
+                    <span class="spinner-border spinner-border-lg align-center"></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private bool loading;
+    private IList<Player> players;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        players = await PlayerService.GetAll();
+        loading = false;
+    }
+
+    private async void DeletePlayer(string id) 
+    {
+        var user = players.First(x => x.Id == id);
+        user.IsDeleting = true;
+        await PlayerService.Delete(id);
+        players.Remove(user);
+        StateHasChanged();
+    }
+}

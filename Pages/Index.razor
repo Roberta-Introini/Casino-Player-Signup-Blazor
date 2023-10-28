@@ -1,0 +1,11 @@
+﻿@page "/"
+@attribute [Authorize]
+@inject IPlayerService PlayerService
+
+<div class="p-4">
+    <div class="container">
+        <h1>Hi @PlayerService.Player.FirstName!</h1>
+        <p>You're logged in with Blazor WebAssembly!!</p>
+        <p><NavLink href="players">Manage Players</NavLink></p>
+    </div>
+</div>

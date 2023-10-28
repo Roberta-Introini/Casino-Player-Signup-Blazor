@@ -1,0 +1,67 @@
+﻿@page "/players/add"
+@using PlayerSignupBlazor.Models.PlayerSignup;
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IPlayerService PlayerService
+@inject NavigationManager NavigationManager
+
+<h1>Add Player</h1>
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col">
+            <label>First Name</label>
+            <InputText @bind-Value="model.FirstName" class="form-control" />
+            <ValidationMessage For="@(() => model.FirstName)" />
+        </div>
+        <div class="form-group col">
+            <label>Last Name</label>
+            <InputText @bind-Value="model.LastName" class="form-control" />
+            <ValidationMessage For="@(() => model.LastName)" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col">
+            <label>Username</label>
+            <InputText @bind-Value="model.Username" class="form-control" />
+            <ValidationMessage For="@(() => model.Username)" />
+        </div>
+        <div class="form-group col">
+            <label>Password</label>
+            <InputText @bind-Value="model.Password" type="password" class="form-control" />
+            <ValidationMessage For="@(() => model.Password)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <button disabled="@loading" class="btn btn-primary">
+            @if (loading) 
+            {
+                <span class="spinner-border spinner-border-sm mr-1"></span>
+            }
+            Save
+        </button>
+        <NavLink href="players" class="btn btn-link">Cancel</NavLink>
+    </div>
+</EditForm>
+
+@code {
+    private AddPlayer model = new AddPlayer();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await PlayerService.Signup(model);
+            AlertService.Success("Player added successfully", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("players");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,87 @@
+﻿@page "/players/edit/{Id}"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IPlayerService PlayerService
+@inject NavigationManager NavigationManager
+
+<h1>Edit Player</h1>
+@if (model != null)
+{
+    <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group col">
+                <label>First Name</label>
+                <InputText @bind-Value="model.FirstName" class="form-control" />
+                <ValidationMessage For="@(() => model.FirstName)" />
+            </div>
+            <div class="form-group col">
+                <label>Last Name</label>
+                <InputText @bind-Value="model.LastName" class="form-control" />
+                <ValidationMessage For="@(() => model.LastName)" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col">
+                <label>Username</label>
+                <InputText @bind-Value="model.Username" class="form-control" />
+                <ValidationMessage For="@(() => model.Username)" />
+            </div>
+            <div class="form-group col">
+                <label>
+                    Password
+                    <em>(Leave blank to keep the same password)</em>
+                </label>
+                <InputText @bind-Value="model.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => model.Password)" />
+            </div>
+        </div>
+        <div class="form-group">
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading) 
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Save
+            </button>
+            <NavLink href="players" class="btn btn-link">Cancel</NavLink>
+        </div>
+    </EditForm>
+}
+else
+{
+    <div class="text-center p-3">
+        <span class="spinner-border spinner-border-lg align-center"></span>
+    </div>
+}
+
+@code {
+    private EditPlayer model;
+    private bool loading;
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await PlayerService.GetById(Id);
+        model = new EditPlayer(user);
+    }
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await PlayerService.Update(Id, model);
+            AlertService.Success("Update successful", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("players");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}
